@@ -1,14 +1,15 @@
 import sqlite3 as sql
 import time
 import random
+import security as secure
 
 
-def insertUser(username, password, DoB):
+def insertUser(username, password, salt):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
     cur.execute(
-        "INSERT INTO users (username,password,dateOfBirth) VALUES (?,?,?)",
-        (username, password, DoB),
+        "INSERT INTO users (username,password,salt) VALUES (?,?,?)",
+        (username, password, salt),
     )
     con.commit()
     con.close()
@@ -17,12 +18,13 @@ def insertUser(username, password, DoB):
 def retrieveUsers(username, password):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM users WHERE username = '{username}'")
+    cur.execute("SELECT password,salt FROM users WHERE username == ?", (username))
+
     if cur.fetchone() == None:
         con.close()
         return False
     else:
-        cur.execute(f"SELECT * FROM users WHERE password = '{password}'")
+        # cur.execute(f"SELECT * FROM users WHERE password == ?", (password))
         # Plain text log of visitor count as requested by Unsecure PWA management
         with open("visitor_log.txt", "r") as file:
             number = int(file.read().strip())
@@ -31,18 +33,19 @@ def retrieveUsers(username, password):
             file.write(str(number))
         # Simulate response time of heavy app for testing purposes
         time.sleep(random.randint(80, 90) / 1000)
-        if cur.fetchone() == None:
-            con.close()
-            return False
-        else:
-            con.close()
-            return True
+        # if cur.fetchone() == None:
+        # con.close()
+        # return False
+        # else:
+        con.close()
+        return True
 
 
 def insertFeedback(feedback):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
     cur.execute(f"INSERT INTO feedback (feedback) VALUES ('{feedback}')")
+
     con.commit()
     con.close()
 
