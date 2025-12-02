@@ -15,15 +15,16 @@ def insertUser(username, password, salt):
     con.close()
 
 
-def retrieveUsers(username, password):
+def retrieveUsers(username, salt):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
-    cur.execute("SELECT password,salt FROM users WHERE username == ?", (username))
+    cur.execute("SELECT salt FROM users WHERE username == ?", (username,))
 
     if cur.fetchone() == None:
         con.close()
         return False
     else:
+        print(cur.fetchone())
         # cur.execute(f"SELECT * FROM users WHERE password == ?", (password))
         # Plain text log of visitor count as requested by Unsecure PWA management
         with open("visitor_log.txt", "r") as file:
